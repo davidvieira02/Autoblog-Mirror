@@ -36,6 +36,11 @@ export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: Reac
         .order('data_agendada', { ascending: true })
         .limit(5);
 
+      if (error && error.message.includes("Could not find the table 'public.pautas'")) {
+        console.warn("Table 'pautas' does not exist in your Supabase project. Please run the SQL in /supabase/schema.sql in your Supabase SQL Editor.");
+        return;
+      }
+
       if (!error && data) {
         setPautas(data as Pauta[]);
       }
@@ -121,7 +126,11 @@ export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: Reac
 
         const { error } = await supabase.from('pautas').insert(insertData);
         if (error) {
-            alert('Supabase Error: ' + (error.message || String(error)));
+            if (error.message && error.message.includes("Could not find the table 'public.pautas'")) {
+               alert("Tabela 'pautas' não encontrada no seu Supabase. Por favor, execute o SQL no arquivo /supabase/schema.sql no painel SQL do seu projeto Supabase.");
+            } else {
+               alert('Supabase Error: ' + (error.message || String(error)));
+            }
             console.error('Supabase Error Details:', error?.message || String(error));
         } else {
             setTemas('');
@@ -144,8 +153,12 @@ export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: Reac
         return;
     }
 
-    await supabase.from('pautas').update({ status: newStatus }).eq('id', id);
-    fetchQueue();
+    const { error } = await supabase.from('pautas').update({ status: newStatus }).eq('id', id);
+    if (error && error.message.includes("Could not find the table 'public.pautas'")) {
+        alert("Tabela 'pautas' não encontrada no seu Supabase. Por favor, execute o código de /supabase/schema.sql");
+    } else {
+        fetchQueue();
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -155,8 +168,12 @@ export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: Reac
          return;
      }
 
-     await supabase.from('pautas').delete().eq('id', id);
-     fetchQueue();
+     const { error } = await supabase.from('pautas').delete().eq('id', id);
+     if (error && error.message.includes("Could not find the table 'public.pautas'")) {
+         alert("Tabela 'pautas' não encontrada no seu Supabase. Por favor, execute o código de /supabase/schema.sql");
+     } else {
+         fetchQueue();
+     }
   }
 
   return (

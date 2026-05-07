@@ -21,7 +21,7 @@ const StatusItem = ({ name, icon, isOk, isPrimary = false, isTertiary = false }:
 export function SystemStatus() {
   const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project-id');
   const isWPConfigured = !!process.env.WORDPRESS_URL && !process.env.WORDPRESS_URL.includes('your-wp-site.com');
-  const isGeminiConfigured = !!process.env.NEXT_PUBLIC_GEMINI_API_KEY || !!process.env.GEMINI_API_KEY;
+  const isGeminiConfigured = !!process.env.GEMINI_API_KEY || !!process.env['NEXT_PUBLIC_' + 'GEMINI_API_KEY'];
 
   return (
     <div className="bg-surface-container-lowest rounded-2xl shadow-sm p-6 border border-outline-variant/30">

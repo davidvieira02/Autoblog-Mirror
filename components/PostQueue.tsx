@@ -50,6 +50,11 @@ export function PostQueue({ pautas, onPause, onDelete }: { pautas: Pauta[], onPa
                  
                  <div className="flex-1 bg-surface p-4 rounded-xl border border-outline-variant/30 hover:border-outline-variant transition-colors relative">
                     <div className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                        {pauta.status === 'processando' || pauta.status === 'erro' ? (
+                            <button onClick={() => onPause(pauta.id, 'pausado')} title="Reiniciar (Voltar para Aguardando)" className="text-on-surface-variant hover:text-primary p-1 rounded-md hover:bg-surface-container-high">
+                               <span className="material-symbols-outlined text-[18px]">replay</span>
+                            </button>
+                        ) : null}
                         <button onClick={() => onPause(pauta.id, pauta.status)} title="Pausar/Retomar" className="text-on-surface-variant hover:text-primary p-1 rounded-md hover:bg-surface-container-high">
                            <span className="material-symbols-outlined text-[18px]">{pauta.status === 'pausado' ? 'play_arrow' : 'pause'}</span>
                         </button>
