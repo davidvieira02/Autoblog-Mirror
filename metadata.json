@@ -1,0 +1,6 @@
+{
+  "name": "AutoBlog AI",
+  "description": "Ferramenta de automação de blogs que gera postagens através do Gemini e publica no WordPress usando a API com agendamento via Supabase e cron jobs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
