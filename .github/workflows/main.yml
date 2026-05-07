@@ -1,0 +1,23 @@
+name: Espelhar Repositorio
+
+on:
+  push:
+    branches: [ main ] # Executa sempre que a branch main for atualizada
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do codigo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Pega todo o historico
+
+      - name: Empurrar para o Destino
+        env:
+          # Substitua os dados abaixo pelo seu usuario B e repo B
+          DEST_REPO: github.com/davidvieira02/Autoblog-Mirror
+          USER_TOKEN: ${{ secrets.DESTINO_TOKEN }}
+        run: |
+          git remote add mirror https://$USER_TOKEN@$DEST_REPO
+          git push mirror main --force
