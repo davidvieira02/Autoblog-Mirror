@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, ReactNode } from 'react';
-import { supabase, type Pauta } from '@/lib/supabase';
+import { supabase, isMockEnvironment, type Pauta } from '@/lib/supabase';
 import { PostQueue } from './PostQueue';
 
 export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: ReactNode }) {
@@ -25,7 +25,7 @@ export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: Reac
 
   const fetchQueue = async () => {
     // If supabase URL is not set, we mock it
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project-id')) {
+    if (isMockEnvironment()) {
       return; 
     }
 
@@ -66,7 +66,7 @@ export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: Reac
     // Prepare entries
     let currentDate = new Date();
     // Default mock data if no Supabase
-    const isMock = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project-id');
+    const isMock = isMockEnvironment();
     const newItems: Pauta[] = [];
 
     // Calculate dates based on selectedTimes
@@ -86,7 +86,7 @@ export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: Reac
            scheduledDate.setDate(scheduledDate.getDate() + 1);
         }
 
-        const mockId = Date.now();
+        const mockId = Math.floor(Math.random() * 1000000);
         const newPauta: Pauta = {
           id: isMock ? `mock-${mockId}-${i}` : '', // Let Supabase handle ID if not mock
           titulo_tema: linhas[i].trim(),
@@ -121,20 +121,22 @@ export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: Reac
 
         const { error } = await supabase.from('pautas').insert(insertData);
         if (error) {
-            console.error(error);
+            alert('Supabase Error: ' + (error.message || String(error)));
+            console.error('Supabase Error Details:', error?.message || String(error));
         } else {
             setTemas('');
             fetchQueue();
         }
-    } catch (e) {
-        console.error(e);
+    } catch (e: any) {
+        alert('Exception: ' + (e?.message || String(e)));
+        console.error('Exception Details:', e?.message || String(e));
     } finally {
         setLoading(false);
     }
   };
 
   const handlePause = async (id: string, currentStatus: string) => {
-    const isMock = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project-id');
+    const isMock = isMockEnvironment();
     const newStatus = currentStatus === 'pausado' ? 'aguardando' : 'pausado';
     
     if (isMock) {
@@ -147,7 +149,7 @@ export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: Reac
   };
 
   const handleDelete = async (id: string) => {
-     const isMock = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project-id');
+     const isMock = isMockEnvironment();
      if (isMock) {
          setPautas(prev => prev.filter(p => p.id !== id));
          return;

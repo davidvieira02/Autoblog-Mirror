@@ -59,8 +59,8 @@ export async function GET(request: Request) {
             if (jsonStrMatch) {
                 generatedPost = JSON.parse(jsonStrMatch[0]);
             }
-        } catch (e) {
-            console.error("Failed to parse Gemini response", e);
+        } catch (e: any) {
+            console.error("Failed to parse Gemini response", e?.message || String(e));
         }
     } else {
         // Fallback or mock if no AI configured
@@ -120,7 +120,7 @@ export async function GET(request: Request) {
     }
     
     // If it fails down the line, we might want to revert or mark as error, but we need the ID
-    console.error("Cron error:", err);
-    return NextResponse.json({ error: err?.message || 'Unknown error' }, { status: 500 });
+    console.error("Cron error:", err?.message || String(err));
+    return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
   }
 }
