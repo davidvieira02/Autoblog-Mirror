@@ -2,7 +2,7 @@ name: Espelhar Repositorio
 
 on:
   push:
-    branches: [ main ] # Executa sempre que a branch main for atualizada
+    branches: [ main ]
 
 jobs:
   mirror:
@@ -11,13 +11,13 @@ jobs:
       - name: Checkout do codigo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Pega todo o historico
+          fetch-depth: 0
+          persist-credentials: false # <--- A MÁGICA ESTÁ AQUI
 
       - name: Empurrar para o Destino
         env:
-          # Substitua os dados abaixo pelo seu usuario B e repo B
-          DEST_REPO: github.com/davidvieira02/Autoblog-Mirror
+          DEST_REPO: github.com/davidvieira02/Autoblog-Mirror.git
           USER_TOKEN: ${{ secrets.DESTINO_TOKEN }}
         run: |
-          git remote add mirror https://$USER_TOKEN@$DEST_REPO
+          git remote add mirror https://${USER_TOKEN}@${DEST_REPO}
           git push mirror main --force
