@@ -91,7 +91,7 @@ export function AutomationEngine({ children }: { children?: ReactNode }) {
             <h3 className="text-xl font-bold text-on-surface mb-2">Automação Inteligente Ativa</h3>
             <p className="text-on-surface-variant leading-relaxed">
               O sistema "Onde Eu Clico" agora opera de forma 100% autônoma. 
-              A cada execução do cron, a IA analisa os posts existentes para garantir que não haja repetições e gera conteúdo novo focado em <strong>Tecnologia para Leigos</strong>.
+              A cada execução do cron, a IA analisa os posts existentes para garantir que não haja repetições e gera conteúdo novo focado em <strong>IA e Inovações Tecnológicas</strong>.
             </p>
           </div>
 
@@ -133,9 +133,9 @@ export function AutomationEngine({ children }: { children?: ReactNode }) {
             <div>
               <h4 className="font-semibold text-on-surface">Configuração de Nicho: Onde Eu Clico</h4>
               <ul className="text-sm text-on-surface-variant mt-2 space-y-2">
-                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> Foco em tutoriais básicos e diretos.</li>
-                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> Linguagem acolhedora para idosos e leigos.</li>
-                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> Prevenção automática de repetições (últimos 40 posts).</li>
+                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> Foco em análises técnicas e novidades do mercado.</li>
+                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> Abordagem acadêmica e especializada.</li>
+                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> Artigos densos de alto padrão (E-E-A-T).</li>
               </ul>
             </div>
           </div>

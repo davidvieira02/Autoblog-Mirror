@@ -88,16 +88,16 @@ export async function GET(request: Request) {
           if (insertError) throw insertError;
           pauta = newPauta as Pauta;
       } else {
-          const suggestionPrompt = `Você é um estrategista de conteúdo focado em SEO e aprovação no Google AdSense para o site "Onde Eu Clico" (ondeeuclico.com.br).
-          Seu nicho é: Acessibilidade Tecnológica e Educação Digital para Leigos e Terceira Idade.
+          const suggestionPrompt = `Você é um estrategista de conteúdo focado em SEO, Google News e aprovação no Google AdSense para o site "Onde Eu Clico" (ondeeuclico.com.br).
+          Seu nicho é: Tecnologia Avançada, Inteligência Artificial, Inovações Tecnológicas e Análise de Tendências.
           
-          Gere UMA sugestão de pauta (título de artigo) inédita, aprofundada e focada em resolver um problema real, comum e doloroso do dia a dia do usuário. 
-          O tema deve permitir um artigo rico e detalhado (E-E-A-T), não apenas um "faça isso e aquilo".
+          Gere UMA sugestão de pauta (título de artigo) inédita, aprofundada, técnica e focada em novidades impactantes ou análises complexas sobre IA e tecnologia. 
+          O tema deve permitir um artigo rico, com alto nível técnico, detalhado e embasado (E-E-A-T).
           
-          Exemplos de temas ricos e úteis: 
-          - "Guia Prático e Seguro: Como limpar a memória do celular sem perder suas fotos"
-          - "Como identificar golpes no WhatsApp e proteger sua família (Passo a Passo)"
-          - "O que fazer se esqueci a senha do e-mail? (Soluções Definitivas)"
+          Exemplos de temas profundos: 
+          - "A evolução dos modelos fundacionais: Como a arquitetura Transformer está sendo superada"
+          - "Análise profunda: O impacto da nova IA do Google no desenvolvimento de software empresarial"
+          - "Além dos LLMs: Como redes neurais líquidas prometem revolucionar sistemas robóticos autônomos"
           
           IMPORTANTE: Não repita ideias ou palavras-chave dos seguintes tópicos que já foram publicados recentemente, para evitar conteúdo duplicado:
           ${recentTitles.slice(0, 40).join(', ')}
@@ -146,26 +146,27 @@ export async function GET(request: Request) {
     
     if (ai) {
         try {
-            const prompt = `Você é um especialista em tecnologia e educador digital com anos de experiência em acessibilidade para a terceira idade e iniciantes. 
-            Você escreve para o blog "Onde Eu Clico". Seu objetivo é criar conteúdo original, extremamente aprofundado e de alta qualidade (foco total em E-E-A-T - Experiência, Especialidade, Autoridade e Confiabilidade - para aprovação no Google AdSense).
+            const prompt = `Você é um analista sênior de tecnologia e inteligência artificial. 
+            Você escreve para o portal "Onde Eu Clico", focado em notícias de tecnologia de ponta, análises de mercado e inovações disruptivas. 
+            Seu objetivo é criar conteúdo original, extremamente aprofundado, técnico e de altíssima qualidade (foco total em E-E-A-T - Experiência, Especialidade, Autoridade e Confiabilidade - para aprovação no Google AdSense e ranqueamento no Google News).
             
-            Escreva um post de blog completo, detalhado e humano para o tutorial: "${pauta.titulo_tema}".
+            Escreva um artigo de opinião ou análise técnica profunda e completa para a pauta: "${pauta.titulo_tema}".
             
-            DIRETRIZES DE CONTEÚDO (Alta Qualidade):
-            1. Inicie o texto com empatia, usando um cenário realista do dia a dia (ex: "Sabe quando você vai tirar uma foto do neto e o celular diz que não tem espaço?"), mostrando compreensão genuína da dificuldade.
-            2. Não faça textos superficiais. O artigo deve ser rico em detalhes e utilidade (idealmente +600 palavras). Explique o "porquê" além do "como fazer".
-            3. Dicas de Ouro e Segurança: Inclua alertas de segurança, dicas para evitar golpes e uma seção de "Solução de Problemas" (o que fazer se o passo a passo não der certo).
-            4. Linguagem: Vocabulário acolhedor e simples. Explique qualquer jargão técnico (como cache, nuvem, link) usando analogias visuais do dia a dia (ex: "a nuvem é como um armário virtual").
+            DIRETRIZES DE CONTEÚDO (Nível Especialista):
+            1. Inicie com um gancho forte (lead jornalístico) contextualizando o impacto do tema no mercado atual, na ciência ou na indústria de software.
+            2. Não faça textos superficiais. O artigo deve ser muito denso, rico em dados, exemplos de arquiteturas, casos de uso reais e análises críticas (idealmente +800 palavras). Explore os "comos", "porquês" e os impactos futuros.
+            3. Visão Crítica e Desafios: Inclua os desafios técnicos, éticos ou de implementação, limitações da tecnologia atual e o que esperar dos próximos 2 a 5 anos.
+            4. Linguagem Técnica e Profissional: Use vocabulário técnico correto, jargões da área (explicando apenas brevemente se for algo muito nichado) e tom acadêmico/jornalístico.
             
-            REGRAS DE FORMATAÇÃO HTML (Não seja engessado):
-            - Como o artigo será renderizado dentro do WordPress, retorne apenas o HTML do miolo. Não use <h1> (o title do JSON já faz esse papel).
-            - Use <h2> e <h3> para criar um sumário visual escaneável.
-            - Use <p> para parágrafos curtos, ideais para leitura no celular.
-            - Use <ul> ou <ol> para listas de materiais ou guias de passos.
-            - (Recomendado) Use <blockquote> para responder a uma "Dúvida Muito Comum" ou dar uma dica de ouro.
+            REGRAS DE FORMATAÇÃO HTML (Obrigatório para WordPress):
+            - Retorne apenas o HTML do miolo. Não use <h1>.
+            - Use <h2> e <h3> para estruturar o artigo em seções bem definidas (ex: Contexto, Arquitetura, Impacto, Desafios, Conclusão).
+            - Use <p> para parágrafos.
+            - Use <ul> ou <ol> para enumerar benefícios, características técnicas ou pontos-chave.
+            - Use <blockquote> para citações relevantes ou destaques críticos.
             - NUNCA use markdown como \`\`\`html no retorno.
 
-            Retorne APENAS um objeto JSON válido com as exatas chaves: "title" (o título atrativo, humano e chamativo) e "content" (todo o corpo do texto do artigo formatado em HTML).`;
+            Retorne APENAS um objeto JSON válido com as exatas chaves: "title" (o título otimizado para SEO e chamativo) e "content" (todo o corpo do texto do artigo formatado em HTML).`;
 
             const response = await ai.models.generateContent({
                model: 'gemini-2.5-flash', 
