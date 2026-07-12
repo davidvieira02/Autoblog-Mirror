@@ -132,11 +132,24 @@ export function AutomationEngine({ children }: { children?: ReactNode }) {
             <span className="material-symbols-outlined text-primary fill mt-0.5">verified</span>
             <div>
               <h4 className="font-semibold text-on-surface">Configuração de Nicho: Onde Eu Clico</h4>
-              <ul className="text-sm text-on-surface-variant mt-2 space-y-2">
+              <ul className="text-sm text-on-surface-variant mt-2 space-y-2 mb-4">
                 <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> Foco em análises técnicas e novidades do mercado.</li>
                 <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> Abordagem acadêmica e especializada.</li>
                 <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> Artigos densos de alto padrão (E-E-A-T).</li>
               </ul>
+              <button 
+                onClick={async () => {
+                   const res = await fetch('/api/clear');
+                   if (res.ok) {
+                       alert('Pautas antigas limpas com sucesso! A próxima gerada usará o novo tema de IA.');
+                       fetchQueue();
+                   }
+                }}
+                className="inline-flex items-center gap-2 bg-error text-on-error px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+              >
+                <span className="material-symbols-outlined text-[18px]">delete_sweep</span>
+                Limpar Pautas Antigas (Fila)
+              </button>
             </div>
           </div>
         </div>
