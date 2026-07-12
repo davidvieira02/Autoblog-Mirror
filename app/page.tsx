@@ -18,7 +18,9 @@ export default function Home() {
             </div>
             <p className="text-lg text-on-surface-variant">Configure o fluxo de criação e publicação de conteúdo.</p>
           </div>
-          <AutomationEngine systemStatusSlot={<SystemStatus />} />
+          <AutomationEngine>
+            <SystemStatus />
+          </AutomationEngine>
         </main>
       </div>
     </>

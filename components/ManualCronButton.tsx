@@ -5,9 +5,12 @@ export function ManualCronButton() {
     <button 
       onClick={async () => {
         try {
-          await fetch('/api/cron'); 
-          alert('Cron script manual finalizado. Verifique a fila.');
-        } catch(e) {}
+          const res = await fetch('/api/cron'); 
+          const data = await res.json();
+          alert('Cron manual finalizado: ' + (data.message || data.error || 'sem retorno'));
+        } catch(e: any) {
+          alert('Erro no cron: ' + e.message);
+        }
       }}
       className="text-primary hover:bg-surface-container px-3 py-1.5 rounded-lg font-semibold text-sm transition-colors border border-outline-variant/30 flex items-center gap-2"
     >

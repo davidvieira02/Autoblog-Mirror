@@ -4,9 +4,7 @@ import { useState, useEffect, ReactNode } from 'react';
 import { supabase, isMockEnvironment, type Pauta } from '@/lib/supabase';
 import { PostQueue } from './PostQueue';
 
-export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: ReactNode }) {
-  const [temas, setTemas] = useState('');
-
+export function AutomationEngine({ children }: { children?: ReactNode }) {
   const [postsPerDay, setPostsPerDay] = useState(3);
   const [loading, setLoading] = useState(false);
   const [pautas, setPautas] = useState<Pauta[]>([]);
@@ -37,7 +35,7 @@ export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: Reac
         .limit(5);
 
       if (error && error.message.includes("Could not find the table 'public.pautas'")) {
-        console.warn("Table 'pautas' does not exist in your Supabase project. Please run the SQL in /supabase/schema.sql in your Supabase SQL Editor.");
+        console.warn("Table 'pautas' does not exist in your Supabase project.");
         return;
       }
 
@@ -51,97 +49,12 @@ export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: Reac
 
   useEffect(() => {
     fetchQueue();
-    
-    // Subscribe to changes if we were fully using real supabase
-    // For now we just poll or fetch on mount
     const interval = setInterval(fetchQueue, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  const handleStartAutomation = async () => {
-    if (!temas.trim()) return;
-    setLoading(true);
-
-    const linhas = temas.split('\\n').filter(t => t.trim().length > 0);
-    if (linhas.length === 0) {
-      setLoading(false);
-      return;
-    }
-
-    // Prepare entries
-    let currentDate = new Date();
-    // Default mock data if no Supabase
-    const isMock = isMockEnvironment();
-    const newItems: Pauta[] = [];
-
-    // Calculate dates based on selectedTimes
-    let timeIndex = 0;
-    
-    for (let i = 0; i < linhas.length; i++) {
-        // Adjust the date string for the chosen times
-        const timeStr = selectedTimes[timeIndex];
-        const [hour, minute] = timeStr.split(':');
-        
-        let scheduledDate = new Date(currentDate);
-        scheduledDate.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
-        
-        // If the scheduled time is in the past for today, we might skip to tomorrow if we were being super precise
-        // For simplicity, we just push it forward
-        if (scheduledDate < new Date()) {
-           scheduledDate.setDate(scheduledDate.getDate() + 1);
-        }
-
-        const mockId = Math.floor(Math.random() * 1000000);
-        const newPauta: Pauta = {
-          id: isMock ? `mock-${mockId}-${i}` : '', // Let Supabase handle ID if not mock
-          titulo_tema: linhas[i].trim(),
-          data_agendada: scheduledDate.toISOString(),
-          status: 'aguardando',
-          url_wordpress: null,
-          created_at: new Date().toISOString()
-        };
-        
-        newItems.push(newPauta);
-
-        timeIndex++;
-        if (timeIndex >= selectedTimes.length) {
-            timeIndex = 0;
-            currentDate.setDate(currentDate.getDate() + 1);
-        }
-    }
-
-    if (isMock) {
-        setPautas(prev => [...prev, ...newItems].sort((a,b) => new Date(a.data_agendada).getTime() - new Date(b.data_agendada).getTime()).slice(0, 5));
-        setTemas('');
-        setLoading(false);
-        return;
-    }
-
-    try {
-        // Exclude ID to let DB generate UUID
-        const insertData = newItems.map(item => {
-            const { id, ...rest } = item;
-            return rest;
-        });
-
-        const { error } = await supabase.from('pautas').insert(insertData);
-        if (error) {
-            if (error.message && error.message.includes("Could not find the table 'public.pautas'")) {
-               alert("Tabela 'pautas' não encontrada no seu Supabase. Por favor, execute o SQL no arquivo /supabase/schema.sql no painel SQL do seu projeto Supabase.");
-            } else {
-               alert('Supabase Error: ' + (error.message || String(error)));
-            }
-            console.error('Supabase Error Details:', error?.message || String(error));
-        } else {
-            setTemas('');
-            fetchQueue();
-        }
-    } catch (e: any) {
-        alert('Exception: ' + (e?.message || String(e)));
-        console.error('Exception Details:', e?.message || String(e));
-    } finally {
-        setLoading(false);
-    }
+  const handleStatusUpdate = () => {
+    fetchQueue();
   };
 
   const handlePause = async (id: string, currentStatus: string) => {
@@ -153,12 +66,8 @@ export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: Reac
         return;
     }
 
-    const { error } = await supabase.from('pautas').update({ status: newStatus }).eq('id', id);
-    if (error && error.message.includes("Could not find the table 'public.pautas'")) {
-        alert("Tabela 'pautas' não encontrada no seu Supabase. Por favor, execute o código de /supabase/schema.sql");
-    } else {
-        fetchQueue();
-    }
+    await supabase.from('pautas').update({ status: newStatus }).eq('id', id);
+    fetchQueue();
   };
 
   const handleDelete = async (id: string) => {
@@ -168,12 +77,8 @@ export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: Reac
          return;
      }
 
-     const { error } = await supabase.from('pautas').delete().eq('id', id);
-     if (error && error.message.includes("Could not find the table 'public.pautas'")) {
-         alert("Tabela 'pautas' não encontrada no seu Supabase. Por favor, execute o código de /supabase/schema.sql");
-     } else {
-         fetchQueue();
-     }
+     await supabase.from('pautas').delete().eq('id', id);
+     fetchQueue();
   }
 
   return (
@@ -182,20 +87,17 @@ export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: Reac
       <div className="lg:col-span-8 space-y-6">
         <div className="bg-surface-container-lowest rounded-2xl shadow-sm p-6 md:p-10 border border-outline-variant/30">
           
-          <div className="mb-6">
-            <label className="block text-xs font-bold text-on-surface-variant mb-3 uppercase tracking-wider">Temas e Ideias de Pautas</label>
-            <textarea 
-              value={temas}
-              onChange={(e) => setTemas(e.target.value)}
-              className="w-full rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-1 focus:ring-primary text-base text-on-surface p-4 resize-y transition-colors" 
-              placeholder="Cole aqui sua lista de temas..." 
-              rows={6}
-            />
+          <div className="mb-8">
+            <h3 className="text-xl font-bold text-on-surface mb-2">Automação Inteligente Ativa</h3>
+            <p className="text-on-surface-variant leading-relaxed">
+              O sistema "Onde Eu Clico" agora opera de forma 100% autônoma. 
+              A cada execução do cron, a IA analisa os posts existentes para garantir que não haja repetições e gera conteúdo novo focado em <strong>Tecnologia para Leigos</strong>.
+            </p>
           </div>
 
           <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-bold text-on-surface-variant mb-3 uppercase tracking-wider">Quantos posts por dia?</label>
+              <label className="block text-xs font-bold text-on-surface-variant mb-3 uppercase tracking-wider">Frequência Estimada</label>
               <div className="flex flex-wrap gap-2">
                 {[1, 2, 3, 4, 5, 6].map(num => (
                   <button 
@@ -211,10 +113,11 @@ export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: Reac
                   </button>
                 ))}
               </div>
+              <p className="text-[11px] text-on-surface-variant mt-2 italic">* A IA gera conteúdo sob demanda quando não há pautas na fila.</p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-on-surface-variant mb-3 uppercase tracking-wider">Horários de Publicação</label>
+              <label className="block text-xs font-bold text-on-surface-variant mb-3 uppercase tracking-wider">Horários de Referência</label>
               <div className="flex flex-wrap gap-3">
                 {selectedTimes.map(time => (
                    <span key={time} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface-container text-on-surface rounded-lg text-sm border border-outline-variant/50">
@@ -225,28 +128,23 @@ export function AutomationEngine({ systemStatusSlot }: { systemStatusSlot?: Reac
             </div>
           </div>
 
-          <div className="mb-8 bg-surface-container-low border border-primary-fixed-dim rounded-xl p-4 flex items-start gap-4">
-            <span className="material-symbols-outlined text-primary fill mt-0.5">info</span>
+          <div className="bg-surface-container-low border border-primary-fixed-dim rounded-xl p-6 flex items-start gap-4">
+            <span className="material-symbols-outlined text-primary fill mt-0.5">verified</span>
             <div>
-              <h4 className="font-semibold text-on-surface">Configuração do Prompt: Tom Simples / Foco em Leigos</h4>
-              <p className="text-sm text-on-surface-variant mt-1 leading-relaxed">A IA usará linguagem acessível, analogias do dia a dia e evitará jargões técnicos para garantir que o conteúdo seja fácil de entender.</p>
+              <h4 className="font-semibold text-on-surface">Configuração de Nicho: Onde Eu Clico</h4>
+              <ul className="text-sm text-on-surface-variant mt-2 space-y-2">
+                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> Foco em tutoriais básicos e diretos.</li>
+                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> Linguagem acolhedora para idosos e leigos.</li>
+                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> Prevenção automática de repetições (últimos 40 posts).</li>
+              </ul>
             </div>
           </div>
-
-          <button 
-            onClick={(e) => { e.preventDefault(); handleStartAutomation(); }}
-            disabled={loading}
-            className="w-full bg-primary hover:bg-primary-container disabled:opacity-70 disabled:cursor-not-allowed text-on-primary font-semibold py-4 px-6 rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 flex justify-center items-center gap-2 active:scale-[0.98]"
-          >
-            <span className="material-symbols-outlined fill">rocket_launch</span>
-            {loading ? 'Processando...' : 'Salvar e Iniciar Automação'}
-          </button>
         </div>
       </div>
 
       {/* Status Column */}
       <div className="lg:col-span-4 space-y-6">
-        {systemStatusSlot}
+        {children}
         <PostQueue pautas={pautas} onPause={handlePause} onDelete={handleDelete} />
       </div>
     </div>
